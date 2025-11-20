@@ -1,0 +1,20 @@
+<odoo>
+    <data>
+        <record id="sequence_codigo_prestamo" model="ir.sequence">
+            <field name="name">Sequencia prestamos</field>
+            <field name="code">biblioteca.prestamo</field>
+            <field name="prefix">BLB-</field>
+            <field name="suffix">-PRS</field>
+            <field name="padding">4</field>
+        </record>
+
+        <record id="sequence_codigo_multa" model="ir.sequence">
+            <field name="name">Sequencia multa</field>
+            <field name="code">biblioteca.multa</field>
+            <field name="prefix">BLB-</field>
+            <field name="suffix">-PRS</field>
+            <field name="padding">4</field>
+        </record>
+
+    </data>
+</odoo>

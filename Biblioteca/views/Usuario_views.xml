@@ -1,0 +1,52 @@
+<odoo>
+    <data>
+    
+        <record model="ir.ui.view" id="biblioteca_usuario_list">
+            <field name="name">biblioteca usuario list</field>
+            <field name="model">biblioteca.usuario</field>
+            <field name="arch" type="xml">
+                <list>
+                    <field name="nombre"/>
+                    <field name="dni"/>
+                    <field name="cel"/>
+                    <field name="correo" widget="email"/>      
+                    <field name="direccion"/>
+                    <field name="tipousuario"/>      
+                    <field name="historialprestamo"/>
+                    <field name="prestamo_ids"/>            
+                </list>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="biblioteca_usuario_form">
+            <field name="name">biblioteca usuario form</field>
+            <field name="model">biblioteca.usuario</field>
+            <field name="arch" type="xml">
+                <form>
+                    <group>
+                        <field name="nombre"/>
+                        <field name="dni" required="True"/>
+                        <field name="cel"/>
+                        <field name="correo" widget="email"/>      
+                        <field name="direccion"/>
+                        <field name="tipousuario"/>      
+                        <field name="historialprestamo"/>
+                        <field name="prestamo_ids"/>    
+                    </group>
+                </form>
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window" id="biblioteca_usuario_action_window">
+            <field name="name">biblioteca usuario</field>
+            <field name="res_model">biblioteca.usuario</field>
+            <field name="view_mode">list,form</field>
+        </record>
+
+        <menuitem name="Usuario menu" 
+            id="biblioteca.usuario"
+            parent="biblioteca_menu"
+            action="biblioteca_usuario_action_window"/>
+
+    </data>
+</odoo>

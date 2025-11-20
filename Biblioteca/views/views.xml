@@ -1,0 +1,7 @@
+<odoo>
+  <data>
+
+    <menuitem name="Biblioteca" id="biblioteca_menu"/>
+
+  </data>
+</odoo>

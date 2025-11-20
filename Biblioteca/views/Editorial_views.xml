@@ -1,0 +1,45 @@
+<odoo>
+    <data>
+        <record model="ir.ui.view" id="biblioteca_editorial_list">
+            <field name="name">biblioteca editorial list</field>
+            <field name="model">biblioteca.editorial</field>
+            <field name="arch" type="xml">
+                <list>
+                    <field name="editorial"/>
+                    <field name="display_name"/>
+                    <field name="ciudad"/>
+                    <field name="fundacion"/>
+                    <field name="libro_ids"/>
+                </list>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="biblioteca_editorial_form">
+            <field name="name">biblioteca editorial form</field>
+            <field name="model">biblioteca.editorial</field>
+            <field name="arch" type="xml">
+                <form>
+                    <group>
+                        <field name="editorial"/>
+                        <field name="display_name"/>
+                        <field name="ciudad"/>
+                        <field name="fundacion"/>
+                        <field name="libro_ids"/>
+                    </group>
+                </form>
+            </field>
+        </record>  
+    
+        <record model="ir.actions.act_window" id="biblioteca_editorial_action_window">
+            <field name="name">biblioteca editorial</field>
+            <field name="res_model">biblioteca.editorial</field>
+            <field name="view_mode">list,form</field>
+        </record>
+
+        <menuitem name="Editorial menu" 
+            id="biblioteca.editorial"
+            parent="biblioteca_menu"
+            action="biblioteca_editorial_action_window"/>
+
+    </data>
+</odoo>

@@ -1,0 +1,14 @@
+<odoo>
+    <data>
+        <record id="cron_codigo_prestamos" model="ir.cron">
+            <field name="name">Accion multas prestamos</field>
+            <field name="model_id" ref="biblioteca.model_biblioteca_prestamo"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_multas()</field>
+            <field name="interval_number">10</field>
+            <field name="interval_type">minutes</field>
+            <field name="nextcall">2025-10-22 09:20:00</field>
+            <field name="active">True</field>
+        </record>
+    </data>
+</odoo>

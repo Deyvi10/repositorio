@@ -1,0 +1,70 @@
+<odoo>
+    <data>
+    
+        <record model="ir.ui.view" id="biblioteca_prestamo_list">
+            <field name="name">biblioteca prestamo list</field>
+            <field name="model">biblioteca.prestamo</field>
+            <field name="arch" type="xml">
+                <list>
+                    <field name="usuario_id"/>
+                    <field name="libro_id"/>
+                    <field name="fechaprestamo"/>
+                    <field name="fechadevolucion"/>
+                    <field name="estado"/>
+                    <field name="multabool"/>
+                    <field name="multa"/>
+                    <field name="fechamax"/>
+                    <field name="personalprestamo"/>
+                </list>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="biblioteca_prestamo_form">
+            <field name="name">biblioteca prestamo form</field>
+            <field name="model">biblioteca.prestamo</field>
+            <field name="arch" type="xml">
+                <form>
+                    <header>
+                        <button string="Prestar" type="object" name="generar_prestamo" class="btn-primary" invisible="estado in ('p','d','m')"/>
+                        <button name="devolver" string="Devolver" type="object" class="btn-secondary" invisible="estado in ('b','d')"/>
+                        <button string="Aplicar multa" type="object" name="action_aplicar_multa" invisible="estado != 'p'" class="btn-danger" confirm="¿Deseas aplicar una multa a este préstamo?"/>
+                        <field name="estado" widget="statusbar"/>
+                        <field name="motivo_multa" widget="radio" options="{'horizontal': True}" readonly="estado in ('b', 'd')"/>
+                    </header>
+                            
+                    <sheet>
+                        <group col="6">
+                            <group colspan="2">
+                                <field name="name" readonly="1"/>
+                                <field name="fechaprestamo" readonly="1"/>
+                                <field name="fechadevolucion" readonly="1"/>
+                                <field name="fechamax" readonly="1"/>
+                            </group>
+                            <group colspan="4">
+                                <field name="usuario_id" readonly="estado in ['p','d','m']"/>
+                                <field name="observaciones" readonly="1"/>
+                                <field name="multabool" readonly="1"/>
+                                <field name="motivo_multa" invisible="estado not in ['p','m']"/>
+                                <field name="multa" readonly="1" invisible="multabool == False"/>
+                                <field name="personalprestamo" readonly="estado in ['p','d','m']"/> 
+                            </group>
+                        </group>
+                        <field name="libro_id" required="1" readonly="estado in ['p','d','m']" nolabel="1"/>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window" id="biblioteca_prestamo_action_window">
+            <field name="name">biblioteca prestamo</field>
+            <field name="res_model">biblioteca.prestamo</field>
+            <field name="view_mode">list,form</field>
+        </record>
+
+        <menuitem name="Prestamo menu" 
+            id="biblioteca.prestamo"
+            parent="biblioteca_menu"
+            action="biblioteca_prestamo_action_window"/>
+
+    </data>
+</odoo>
