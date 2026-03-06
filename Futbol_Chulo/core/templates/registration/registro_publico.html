@@ -1,0 +1,130 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Nuevo Fichaje | Cancha El Chulo{% endblock %}
+
+{% block contenido %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            
+            <div class="card card-pro border-0 shadow-lg rounded-4 overflow-hidden animate__animated animate__fadeIn">
+                
+                <div class="card-header bg-white border-0 text-center pt-5 pb-0">
+                    <div class="mb-3 d-inline-block p-3 rounded-circle shadow-sm" style="background: #fffbeb;"> <i class="bi bi-trophy-fill text-warning fs-1"></i>
+                    </div>
+                    <h2 class="fw-bold text-dark mb-1" style="font-family: 'Montserrat', sans-serif;">Nuevo Fichaje</h2>
+                    <p class="text-muted">Completa tu perfil para unirte a la <span class="text-success fw-bold">Copa Chulo 2026</span></p>
+                </div>
+
+                <div class="card-body p-4 p-md-5">
+                    
+                    <form method="post" class="needs-validation">
+                        {% csrf_token %}
+                        
+                        {% for field in form %}
+                        <div class="mb-4 position-relative">
+                            <label class="form-label text-secondary small fw-bold text-uppercase ls-1 ms-1">
+                                {{ field.label }}
+                            </label>
+                            
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0 text-success rounded-start-3 ps-3">
+                                    {% if 'password' in field.name %}
+                                        <i class="bi bi-lock-fill"></i>
+                                    {% elif 'email' in field.name %}
+                                        <i class="bi bi-envelope-fill"></i>
+                                    {% else %}
+                                        <i class="bi bi-person-fill"></i>
+                                    {% endif %}
+                                </span>
+                                
+                                <div class="flex-grow-1 form-control-wrapper">
+                                    {{ field }}
+                                </div>
+                            </div>
+
+                            {% if field.help_text %}
+                                <div class="form-text text-muted small fst-italic ms-2 mt-1">
+                                    <i class="bi bi-info-circle me-1"></i>{{ field.help_text }}
+                                </div>
+                            {% endif %}
+                            
+                            {% if field.errors %}
+                                <div class="alert alert-danger border-0 bg-danger bg-opacity-10 py-2 mt-2 rounded-3 small">
+                                    {{ field.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+
+                        <div class="form-check mb-4">
+                            <input class="form-check-input" type="checkbox" id="terms" required>
+                            <label class="form-check-label small text-muted" for="terms">
+                                Acepto las reglas de la <a href="#" class="text-success fw-bold text-decoration-none">Cancha El Chulo</a> y el reglamento de sanciones.
+                            </label>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-sport py-3 shadow-sm text-uppercase fw-bold ls-1">
+                                <i class="bi bi-pen-fill me-2"></i> Firmar Contrato
+                            </button>
+                        </div>
+
+                    </form>
+                </div>
+
+                <div class="card-footer bg-light border-0 text-center py-4">
+                    <p class="text-muted small mb-0">¿Ya tienes un equipo?</p>
+                    <a href="{% url 'login' %}" class="btn btn-link text-decoration-none fw-bold text-success">
+                        Ingresar a los camerinos <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Forzamos a que los inputs generados por Django se vean bien */
+    .form-control-wrapper input, 
+    .form-control-wrapper select, 
+    .form-control-wrapper textarea {
+        display: block;
+        width: 100%;
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+        font-weight: 400;
+        line-height: 1.5;
+        color: #334155;
+        background-color: #f8fafc; /* Gris muy claro */
+        background-clip: padding-box;
+        border: 1px solid #cbd5e1; /* Borde sutil */
+        border-left: 0; /* Quitamos el borde izquierdo para unirlo al icono */
+        border-radius: 0 0.5rem 0.5rem 0;
+        transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+    }
+
+    /* Efecto Focus (Verde Cancha) */
+    .form-control-wrapper input:focus,
+    .form-control-wrapper select:focus {
+        color: #334155;
+        background-color: #fff;
+        border-color: var(--accent-green);
+        outline: 0;
+        box-shadow: none; /* Quitamos el shadow azul de bootstrap */
+    }
+
+    /* Focus al grupo completo */
+    .input-group:focus-within .input-group-text {
+        background-color: #fff;
+        border-color: var(--accent-green);
+        color: var(--accent-green);
+    }
+    
+    .input-group:focus-within input {
+        border-color: var(--accent-green);
+    }
+</style>
+{% endblock %}

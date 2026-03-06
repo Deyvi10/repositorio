@@ -1,0 +1,338 @@
+{% extends 'core/base.html' %}
+
+{% block contenido %}
+
+{% if request.session.reserva_pendiente %}
+<div class="alert alert-warning border-0 shadow-sm d-flex align-items-center justify-content-between mb-4 rounded-4" style="background-color: #fef3c7; color: #92400e;">
+    <div>
+        <i class="bi bi-cart-fill me-2 fs-5"></i>
+        <strong>¡Tienes una reserva sin confirmar!</strong> Termina el proceso enviando el WhatsApp.
+    </div>
+    <a href="{% url 'checkout_pago' %}" class="btn btn-sm btn-dark fw-bold rounded-pill px-3">
+        Completar <i class="bi bi-arrow-right"></i>
+    </a>
+</div>
+{% endif %}
+
+{% if user.is_authenticated and user.perfil.rol == 'ORG' and deudas %}
+<div class="row mb-4 animate__animated animate__fadeInDown">
+    <div class="col-12">
+        <div class="card card-pro border-start border-danger border-4">
+            <div class="card-header bg-transparent border-bottom-0 d-flex justify-content-between align-items-center pt-4 pb-2 px-4">
+                <h5 class="mb-0 fw-bold" style="color: var(--primary-dark);">
+                    <i class="bi bi-cash-coin me-2 text-danger"></i>Cuentas por Cobrar
+                </h5>
+                <span class="badge bg-danger text-white shadow-sm fw-bold px-3 py-2 fs-6">
+                    Pendiente: ${{ total_por_cobrar }}
+                </span>
+            </div>
+            <div class="card-body px-4">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light text-muted small border-bottom">
+                            <tr>
+                                <th>Equipo</th>
+                                <th>Motivo</th>
+                                <th>Monto</th>
+                                <th class="text-end">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for multa in deudas %}
+                            <tr class="border-bottom" style="border-color: rgba(0,0,0,0.03) !important;">
+                                <td class="fw-bold" style="color: var(--primary-dark);">{{ multa.equipo.nombre }}</td>
+                                <td class="text-muted">{{ multa.get_tipo_display }}</td>
+                                <td class="fw-bold text-danger">${{ multa.monto }}</td>
+                                <td class="text-end">
+                                    <form action="{% url 'cobrar_sancion' multa.id %}" method="post" style="display:inline-block;">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-outline-success fw-bold rounded-pill px-3 shadow-sm" 
+                                                onclick="return confirm('¿Confirmas el pago de ${{ multa.monto }}?');">
+                                            <i class="bi bi-check-lg"></i> Cobrar
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% if user.is_authenticated and user.perfil.rol == 'DIR' and tengo_deudas %}
+    <div class="alert alert-danger border-0 shadow-sm mb-5 rounded-4 animate__animated animate__headShake">
+        <h4 class="alert-heading fw-bold"><i class="bi bi-exclamation-octagon-fill me-2"></i>¡Tu equipo está bloqueado!</h4>
+        <p>Tienes sanciones pendientes por un total de <strong class="fs-5">${{ monto_deuda }}</strong>.</p>
+        <hr class="border-danger opacity-25">
+        <p class="mb-0 small fw-semibold">No podrás jugar tu próximo partido hasta regularizar los pagos con la administración.</p>
+    </div>
+{% endif %}
+
+<div class="row mb-5 align-items-end animate__animated animate__fadeInDown">
+    <div class="col-md-8">
+        <h6 class="text-uppercase mb-1 fw-bold ls-1" style="color: var(--accent-green);">Panel de Control</h6>
+        <h1 class="display-5 fw-bold" style="color: var(--primary-dark);">
+            Hola, <span style="color: var(--accent-green);">
+                {% if user.is_authenticated %}
+                    {{ user.first_name|default:user.username }}
+                {% else %}
+                    Invitado
+                {% endif %}
+            </span>
+        </h1>
+        <p class="lead text-muted mb-0">Bienvenido al sistema de gestión deportiva profesional.</p>
+    </div>
+    <div class="col-md-4 text-md-end mt-3 mt-md-0">
+        <div class="d-inline-block bg-white px-4 py-3 rounded-4 shadow-sm border border-secondary-subtle">
+            <i class="bi bi-calendar-check fs-5 me-2" style="color: var(--accent-green);"></i> 
+            <span class="fw-bold" style="color: var(--primary-dark);">{% now "l, d F Y" %}</span>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-5 animate__animated animate__fadeInUp">
+    <div class="col-md-6">
+        <div class="card card-pro h-100 overflow-hidden text-white" style="background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-light) 100%); border: none;">
+            <div class="card-body p-4 p-lg-5 d-flex align-items-center justify-content-between position-relative">
+                <div style="z-index: 2;">
+                    <h3 class="fw-bold mb-2"><i class="bi bi-calendar-plus me-2 text-success"></i>Reservar Cancha</h3>
+                    <p class="mb-4 text-white-50 fs-5">Agenda tu partido. Tarifa plana de $5/hora.</p>
+                    <a href="{% url 'reservar_cancha' %}" class="btn btn-sport fw-bold px-4 rounded-pill shadow-lg">
+                        Ver Disponibilidad <i class="bi bi-arrow-right-circle-fill ms-2"></i>
+                    </a>
+                </div>
+                <i class="bi bi-stopwatch display-1 opacity-25 position-absolute end-0 me-4" style="transform: scale(1.5);"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card card-pro h-100 bg-white">
+            <div class="card-body p-4 p-lg-5 d-flex align-items-center justify-content-between">
+                <div>
+                    <h3 class="fw-bold" style="color: var(--primary-dark);">Tablas de Posiciones</h3>
+                    <p class="text-muted fs-5 mb-4">Revisa los puntajes, goleadores y sanciones.</p>
+                    <a href="{% url 'seleccionar_reporte' %}" class="btn btn-outline-dark fw-bold px-4 rounded-pill border-2">
+                        Ver Estadísticas
+                    </a>
+                </div>
+                <div class="rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 80px; height: 80px; background-color: rgba(245, 158, 11, 0.1);">
+                    <i class="bi bi-trophy-fill text-warning display-5"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if user.is_authenticated and not user.perfil.rol == 'ORG' %}
+<div class="mb-5 animate__animated animate__fadeInUp">
+    <h5 class="fw-bold mb-4 border-bottom pb-2" style="color: var(--primary-dark);"><i class="bi bi-person-circle me-2"></i>Mi Cuenta</h5>
+    <div class="row g-4">
+        <div class="col-md-4 col-lg-3">
+            <a href="{% url 'mis_reservas' %}" class="card card-pro h-100 text-decoration-none text-center">
+                <div class="card-body py-4">
+                    <div class="rounded-circle d-inline-flex align-items-center justify-content-center bg-success bg-opacity-10 mb-3" style="width: 60px; height: 60px;">
+                        <i class="bi bi-receipt text-success fs-3"></i>
+                    </div>
+                    <h6 class="fw-bold text-dark m-0">Mis Reservas</h6>
+                </div>
+            </a>
+        </div>
+        
+        {% if user.perfil.rol == 'DIR' %}
+        <div class="col-md-4 col-lg-3">
+            <a href="{% url 'gestionar_jugadores' %}" class="card card-pro h-100 text-decoration-none text-center">
+                <div class="card-body py-4">
+                    <div class="rounded-circle d-inline-flex align-items-center justify-content-center bg-primary bg-opacity-10 mb-3" style="width: 60px; height: 60px;">
+                        <i class="bi bi-people-fill text-primary fs-3"></i>
+                    </div>
+                    <h6 class="fw-bold text-dark m-0">Mi Equipo</h6>
+                </div>
+            </a>
+        </div>
+        {% endif %}
+
+        <div class="col-md-4 col-lg-3">
+            <a href="{% url 'ver_torneos_activos' %}" class="card card-pro h-100 text-decoration-none text-center">
+                <div class="card-body py-4">
+                    <div class="rounded-circle d-inline-flex align-items-center justify-content-center bg-warning bg-opacity-10 mb-3" style="width: 60px; height: 60px;">
+                        <i class="bi bi-trophy-fill text-warning fs-3"></i>
+                    </div>
+                    <h6 class="fw-bold text-dark m-0">Unirse a Torneo</h6>
+                    <small class="text-muted d-block mt-1">Ver Campeonatos</small>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+
+{% if user.is_authenticated and user.perfil.rol == 'ORG' %}
+
+<div class="animate__animated animate__fadeInUp delay-1s mb-5">
+    <div class="d-flex align-items-center justify-content-between mb-4 pb-2 border-bottom">
+        <h4 class="fw-bold m-0" style="color: var(--primary-dark);">
+            <i class="bi bi-shield-lock-fill me-2 text-danger"></i>Centro de Administración
+        </h4>
+        <span class="badge bg-danger bg-opacity-10 text-danger border border-danger px-3 py-2 rounded-pill fw-bold">Modo Dios</span>
+    </div>
+
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card card-pro border-start border-warning border-4">
+                <div class="card-header bg-transparent pt-4 pb-2 px-4 d-flex align-items-center border-bottom-0">
+                    <div class="bg-warning text-white rounded-circle d-flex align-items-center justify-content-center me-3 shadow-sm" style="width: 40px; height: 40px;">
+                        <i class="bi bi-bell-fill fs-5"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold mb-0" style="color: var(--primary-dark);">Turnos por Confirmar</h5>
+                        <p class="small text-muted mt-1 mb-0">Revisa los comprobantes en tu WhatsApp antes de aprobar estas reservas.</p>
+                    </div>
+                </div>
+                <div class="card-body px-4">
+                    {% if reservas_pendientes %}
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0 text-center">
+                                <thead class="bg-light text-muted small border-bottom">
+                                    <tr>
+                                        <th class="text-start">Cliente</th>
+                                        <th>Fecha del Turno</th>
+                                        <th>Horario</th>
+                                        <th>Total a Pagar</th>
+                                        <th class="text-end">Acción</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for r in reservas_pendientes %}
+                                    <tr class="border-bottom" style="border-color: rgba(0,0,0,0.03) !important;">
+                                        <td class="text-start">
+                                            <div class="fw-bold text-dark">{{ r.usuario.first_name }} {{ r.usuario.last_name }}</div>
+                                            <small class="text-muted">@{{ r.usuario.username }}</small>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-light text-dark border px-2 py-1 shadow-sm"><i class="bi bi-calendar me-1"></i>{{ r.fecha|date:"d M Y" }}</span>
+                                        </td>
+                                        <td>
+                                            <span class="fw-bold" style="color: var(--primary-dark);">{{ r.hora_inicio|time:"H:i" }} a {{ r.hora_fin|time:"H:i" }}</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-success bg-opacity-10 text-success border border-success px-3 py-1 fs-6">${{ r.precio_total }}</span>
+                                        </td>
+                                        <td class="text-end">
+                                            <a href="{% url 'cancelar_reserva' r.id %}" class="btn btn-sm btn-outline-danger rounded-pill fw-bold px-3 me-2" onclick="return confirm('¿Seguro que deseas rechazar y eliminar este turno?');">Rechazar</a>
+                                            <a href="{% url 'aprobar_reserva_admin' r.id %}" class="btn btn-sm btn-sport rounded-pill px-4">
+                                                <i class="bi bi-check-lg me-1"></i> Aprobar
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="bi bi-check2-circle display-4 text-muted opacity-25 mb-2"></i>
+                            <p class="mb-0 text-muted fw-semibold">No tienes reservas pendientes de aprobación.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h6 class="text-muted text-uppercase small fw-bold mb-3 ls-1">1. Gestión Deportiva</h6>
+    <div class="row g-4 mb-5">
+        <div class="col-md-3">
+            <a href="{% url 'gestionar_torneos' %}" class="card card-pro h-100 text-decoration-none text-center">
+                <div class="card-body py-4">
+                    <div class="rounded-circle d-inline-flex align-items-center justify-content-center bg-primary bg-opacity-10 mb-3" style="width: 60px; height: 60px;">
+                        <i class="bi bi-diagram-3 text-primary fs-3"></i>
+                    </div>
+                    <h6 class="fw-bold text-dark m-0">Torneos</h6>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3">
+             <a href="{% url 'gestionar_equipos' %}" class="card card-pro h-100 text-decoration-none text-center">
+                <div class="card-body py-4">
+                    <div class="rounded-circle d-inline-flex align-items-center justify-content-center bg-success bg-opacity-10 mb-3" style="width: 60px; height: 60px;">
+                        <i class="bi bi-shield-shaded text-success fs-3"></i>
+                    </div>
+                    <h6 class="fw-bold text-dark m-0">Equipos</h6>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3">
+            <a href="{% url 'programar_partidos' %}" class="card card-pro h-100 text-decoration-none text-center">
+                <div class="card-body py-4">
+                    <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px; background-color: rgba(99, 102, 241, 0.1);">
+                        <i class="bi bi-calendar-week fs-3" style="color: #6366f1;"></i>
+                    </div>
+                    <h6 class="fw-bold text-dark m-0">Programación</h6>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3">
+             <a href="{% url 'gestionar_solicitudes' %}" class="card card-pro h-100 text-decoration-none text-center">
+                <div class="card-body py-4">
+                    <div class="rounded-circle d-inline-flex align-items-center justify-content-center bg-danger bg-opacity-10 mb-3" style="width: 60px; height: 60px;">
+                        <i class="bi bi-inbox-fill text-danger fs-3"></i>
+                    </div>
+                    <h6 class="fw-bold text-dark m-0">Solicitudes</h6>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <h6 class="text-muted text-uppercase small fw-bold mb-3 ls-1">2. Oficina & Finanzas</h6>
+    <div class="row g-4">
+        <div class="col-md-3">
+            <a href="{% url 'admin_gestion_jugadores' %}" class="card card-pro h-100 text-decoration-none text-center">
+                <div class="card-body py-4">
+                    <div class="rounded-circle d-inline-flex align-items-center justify-content-center bg-warning bg-opacity-10 mb-3" style="width: 60px; height: 60px;">
+                        <i class="bi bi-people-fill text-warning fs-3"></i>
+                    </div>
+                    <h6 class="fw-bold text-dark m-0">Jugadores Global</h6>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3">
+            <a href="{% url 'admin_gestion_usuarios' %}" class="card card-pro h-100 text-decoration-none text-center">
+                <div class="card-body py-4">
+                    <div class="rounded-circle d-inline-flex align-items-center justify-content-center bg-secondary bg-opacity-10 mb-3" style="width: 60px; height: 60px;">
+                        <i class="bi bi-person-gear text-secondary fs-3"></i>
+                    </div>
+                    <h6 class="fw-bold text-dark m-0">Usuarios y Roles</h6>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3">
+            <a href="{% url 'gestionar_finanzas' %}" class="card card-pro h-100 text-decoration-none text-center">
+                <div class="card-body py-4">
+                    <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px; background-color: rgba(16, 185, 129, 0.1);">
+                        <i class="bi bi-cash-stack fs-3" style="color: var(--accent-green);"></i>
+                    </div>
+                    <h6 class="fw-bold text-dark m-0">Finanzas Global</h6>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100 border-0 shadow-sm text-decoration-none text-center bg-light border" style="opacity: 0.7; cursor: not-allowed;">
+                <div class="card-body py-4">
+                    <div class="rounded-circle d-inline-flex align-items-center justify-content-center bg-dark bg-opacity-10 mb-3" style="width: 60px; height: 60px;">
+                        <i class="bi bi-ticket-perforated text-dark fs-3"></i>
+                    </div>
+                    <h6 class="fw-bold text-dark m-0">Cupones (Próximamente)</h6>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}

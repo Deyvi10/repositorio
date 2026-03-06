@@ -1,0 +1,87 @@
+{% extends 'core/base.html' %}
+
+{% block contenido %}
+<div class="row animate__animated animate__fadeIn">
+    <div class="col-12 mb-4">
+        <h2 class="text-neon-blue">
+            <i class="bi bi-people-fill"></i> Gestión de Usuarios y Permisos
+        </h2>
+        <p class="text-muted">Aquí puedes ascender a los usuarios nuevos a Dirigentes o Vocales.</p>
+    </div>
+
+    <div class="col-12">
+        <div class="card bg-dark border-secondary shadow">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover mb-0 align-middle">
+                        <thead class="bg-secondary text-uppercase small text-muted">
+                            <tr>
+                                <th class="ps-4">Usuario</th>
+                                <th>Email / Contacto</th>
+                                <th class="text-center">Rol Actual</th>
+                                <th>Cambiar Rol</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for p in perfiles %}
+                            <tr>
+                                <td class="ps-4">
+                                    <div class="fw-bold text-white">{{ p.usuario.first_name }} {{ p.usuario.last_name }}</div>
+                                    <small class="text-muted">@{{ p.usuario.username }}</small>
+                                </td>
+                                
+                                <td>
+                                    <div class="text-white">{{ p.usuario.email }}</div>
+                                    {% if p.telefono %}
+                                        <small class="text-info"><i class="bi bi-whatsapp"></i> {{ p.telefono }}</small>
+                                    {% endif %}
+                                </td>
+
+                                <td class="text-center">
+                                    {% if p.rol == 'FAN' %}
+                                        <span class="badge bg-secondary border border-secondary">Aficionado</span>
+                                    {% elif p.rol == 'DIR' %}
+                                        <span class="badge bg-primary text-dark border border-primary">Dirigente</span>
+                                    {% elif p.rol == 'VOC' %}
+                                        <span class="badge bg-warning text-dark border border-warning">Vocal</span>
+                                    {% elif p.rol == 'ORG' %}
+                                        <span class="badge bg-danger border border-danger">Organizador</span>
+                                    {% endif %}
+                                </td>
+                                
+                                <form method="post">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="perfil_id" value="{{ p.id }}">
+                                    
+                                    <td style="width: 200px;">
+                                        <select name="nuevo_rol" class="form-select form-select-sm bg-black text-white border-secondary">
+                                            <option value="FAN" {% if p.rol == 'FAN' %}selected{% endif %}>Aficionado (Sin permisos)</option>
+                                            <option value="DIR" {% if p.rol == 'DIR' %}selected{% endif %}>Dirigente (Su equipo)</option>
+                                            <option value="VOC" {% if p.rol == 'VOC' %}selected{% endif %}>Vocal (Mesa de control)</option>
+                                            <option value="ORG" {% if p.rol == 'ORG' %}selected{% endif %}>Organizador (Total)</option>
+                                        </select>
+                                    </td>
+                                    
+                                    <td>
+                                        <button type="submit" class="btn btn-sm btn-outline-success" title="Guardar Cambios">
+                                            <i class="bi bi-check-lg"></i> Guardar
+                                        </button>
+                                    </td>
+                                </form>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center py-5 text-muted">
+                                    No hay otros usuarios registrados aparte de ti.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

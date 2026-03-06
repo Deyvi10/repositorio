@@ -1,0 +1,88 @@
+{% extends 'core/base.html' %}
+
+{% block contenido %}
+<div class="container animate__animated animate__fadeIn">
+    
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h6 class="text-success text-uppercase fw-bold ls-1 mb-1">Administración</h6>
+            <h2 class="display-6 fw-bold text-primary-dark">Directorio Global de Jugadores</h2>
+        </div>
+        
+        <form class="d-flex" method="get">
+            <div class="input-group">
+                <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                <input class="form-control border-start-0" type="search" name="q" placeholder="Buscar por nombre, cédula o equipo..." value="{{ request.GET.q|default:'' }}">
+                <button class="btn btn-primary" type="submit">Buscar</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="card border-0 shadow-sm overflow-hidden">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-4">Jugador</th>
+                            <th>Equipo</th>
+                            <th>Dorsal</th>
+                            <th>Posición</th>
+                            <th>Cédula</th>
+                            <th class="text-end pe-4">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for j in jugadores %}
+                        <tr>
+                            <td class="ps-4">
+                                <div class="d-flex align-items-center">
+                                    {% if j.foto %}
+                                        <img src="{{ j.foto.url }}" class="rounded-circle me-3 border border-2 border-white shadow-sm" width="45" height="45" style="object-fit: cover;">
+                                    {% else %}
+                                        <div class="bg-light rounded-circle d-flex align-items-center justify-content-center me-3 border" style="width: 45px; height: 45px;">
+                                            <i class="bi bi-person-fill text-muted fs-5"></i>
+                                        </div>
+                                    {% endif %}
+                                    <div>
+                                        <div class="fw-bold text-dark">{{ j.nombres }}</div>
+                                        <small class="text-muted">Alias: {{ j.alias|default:"--" }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1">
+                                    {{ j.equipo.nombre }}
+                                </span>
+                            </td>
+                            <td class="fw-bold text-center">{{ j.dorsal }}</td>
+                            <td>{{ j.get_posicion_display }}</td>
+                            <td class="text-muted small font-monospace">{{ j.cedula|default:"-- --" }}</td>
+                            <td class="text-end pe-4">
+                                <div class="btn-group">
+                                    <a href="{% url 'editar_jugador' j.id %}" class="btn btn-sm btn-outline-secondary" title="Editar">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+                                    <a href="{% url 'eliminar_jugador' j.id %}" class="btn btn-sm btn-outline-danger" title="Eliminar" onclick="return confirm('¿Estás seguro de eliminar a este jugador?');">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center py-5">
+                                <div class="text-muted">
+                                    <i class="bi bi-people display-4 opacity-25 mb-3 d-block"></i>
+                                    <p>No se encontraron jugadores registrados.</p>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

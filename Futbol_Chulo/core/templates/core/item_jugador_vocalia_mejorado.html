@@ -1,0 +1,35 @@
+<div class="list-group">
+    {% for j in lista %}
+    <div class="list-group-item bg-dark text-white border-secondary d-flex justify-content-between align-items-center p-2 mb-1">
+        <div style="width: 45%;">
+            <span class="badge bg-secondary me-1">{{ j.dorsal }}</span>
+            <span class="small fw-bold">{{ j.nombres|truncatechars:15 }}</span>
+        </div>
+        
+        <div class="btn-group btn-group-sm">
+            
+            <a href="{% url 'toggle_asistencia' partido.id j.id %}" 
+               class="btn {% if j.id in asistencias_ids %}btn-success{% else %}btn-outline-secondary{% endif %}" 
+               title="Clic para marcar/desmarcar asistencia">
+               {% if j.id in asistencias_ids %}
+                   ✅ {% else %}
+                   Presente {% endif %}
+            </a>
+
+            <form method="post" class="ms-1">{% csrf_token %}
+                <input type="hidden" name="jugador_id" value="{{ j.id }}"><input type="hidden" name="tipo" value="GOL">
+                <button class="btn btn-success">⚽</button>
+            </form>
+            
+            <button class="btn btn-warning ms-1" type="button" data-bs-toggle="dropdown">⚖️</button>
+            <ul class="dropdown-menu dropdown-menu-dark p-1">
+                <li><form method="post">{% csrf_token %}<input type="hidden" name="jugador_id" value="{{ j.id }}"><input type="hidden" name="tipo" value="TA"><button class="dropdown-item text-warning">🟨 Amarilla</button></form></li>
+                <li><form method="post">{% csrf_token %}<input type="hidden" name="jugador_id" value="{{ j.id }}"><input type="hidden" name="tipo" value="TR"><button class="dropdown-item text-danger">🟥 Roja</button></form></li>
+                <li><form method="post">{% csrf_token %}<input type="hidden" name="jugador_id" value="{{ j.id }}"><input type="hidden" name="tipo" value="DA"><button class="dropdown-item">🟨🟨 Doble A.</button></form></li>
+                <li><form method="post">{% csrf_token %}<input type="hidden" name="jugador_id" value="{{ j.id }}"><input type="hidden" name="tipo" value="AZUL"><button class="dropdown-item">👕 Uniforme</button></form></li>
+                <li><form method="post">{% csrf_token %}<input type="hidden" name="jugador_id" value="{{ j.id }}"><input type="hidden" name="tipo" value="EBRI"><button class="dropdown-item">🍺 Ebrio</button></form></li>
+            </ul>
+        </div>
+    </div>
+    {% endfor %}
+</div>

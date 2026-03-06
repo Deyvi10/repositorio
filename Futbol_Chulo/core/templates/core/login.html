@@ -1,0 +1,202 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Acceso Oficial | Cancha El Chulo{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Ocultamos la navbar standard para dar foco total al login */
+    .navbar { display: none !important; }
+    .main-content { margin-top: 0 !important; padding-bottom: 0 !important; }
+    
+    body {
+        background-color: #fff;
+        height: 100vh;
+        overflow: hidden;
+    }
+
+    /* COLUMNA IZQUIERDA: TU LOGO HEROICO */
+    .login-cover {
+        /* Fondo degradado "Noche de Copa": Azul oscuro a Verde césped */
+        background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
+        position: relative;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 4rem;
+        color: white;
+        overflow: hidden;
+    }
+
+    /* Patrón sutil de fondo (opcional, le da textura) */
+    .login-cover::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%2310b981' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+
+    /* Efecto de brillo detrás del logo */
+    .logo-glow {
+        position: absolute;
+        width: 300px;
+        height: 300px;
+        background: var(--accent-green);
+        filter: blur(100px);
+        opacity: 0.2;
+        border-radius: 50%;
+        z-index: 0;
+    }
+
+    /* Estilo del Logo Principal */
+    .hero-logo {
+        position: relative; /* Para estar sobre el glow */
+        z-index: 1;
+        max-width: 280px; /* Tamaño grande e imponente */
+        filter: drop-shadow(0 10px 20px rgba(0,0,0,0.3));
+        transition: transform 0.5s ease;
+    }
+    .hero-logo:hover {
+        transform: scale(1.05) rotate(-2deg);
+    }
+
+    /* COLUMNA DERECHA: FORMULARIO */
+    .login-form-container {
+        height: 100vh;
+        overflow-y: auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #ffffff;
+    }
+
+    .form-wrapper {
+        width: 100%;
+        max-width: 400px;
+        padding: 2rem;
+    }
+
+    /* Inputs Estilo Material/Google */
+    .form-floating > .form-control {
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        background-color: #f8fafc;
+    }
+    .form-floating > .form-control:focus {
+        border-color: var(--accent-green);
+        background-color: #fff;
+        box-shadow: none;
+    }
+    
+    /* Botón Principal */
+    .btn-login-pro {
+        background: linear-gradient(90deg, var(--accent-green) 0%, #059669 100%);
+        color: white;
+        font-weight: 700;
+        padding: 12px;
+        border-radius: 10px;
+        border: none;
+        width: 100%;
+        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        transition: all 0.3s;
+    }
+    .btn-login-pro:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+        color: white;
+    }
+</style>
+{% endblock %}
+
+{% block contenido %}
+<div class="row g-0 h-100">
+    
+    <div class="col-lg-7 d-none d-lg-flex login-cover">
+        
+        <div class="logo-glow"></div>
+
+        <img src="{% static 'img/logo_chulo_white.png' %}" alt="Logo Cancha El Chulo" class="img-fluid hero-logo mb-4 animate__animated animate__zoomIn">
+
+        <div class="text-center position-relative z-1 animate__animated animate__fadeInUp animate__delay-1s">
+            <h2 class="fw-bold text-white mb-2" style="font-family: 'Montserrat', sans-serif; letter-spacing: -1px;">
+                Gestión Deportiva PRO
+            </h2>
+            <p class="text-white-50 fs-5 mb-0">
+                La pasión se organiza aquí.
+            </p>
+            <div class="mt-4">
+                <span class="badge bg-white text-dark rounded-pill px-3 py-2 shadow-sm">
+                    <i class="bi bi-shield-check text-success me-1"></i> Cancha "El Chulo" 2026
+                </span>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="col-lg-5">
+        <div class="login-form-container">
+            <div class="form-wrapper animate__animated animate__fadeInRight">
+                
+                <div class="text-center d-lg-none mb-4">
+                     <img src="{% static 'img/logo_chulo_white.png' %}" width="80" alt="Logo">
+                </div>
+
+                <div class="mb-5">
+                    <h3 class="fw-bold text-dark mb-1">¡Hola Crack! <span class="fs-4">👋</span></h3>
+                    <p class="text-muted small">Ingresa tus credenciales para administrar.</p>
+                </div>
+
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    {% if form.errors %}
+                        <div class="alert alert-danger border-0 bg-danger bg-opacity-10 text-danger rounded-3 d-flex align-items-center mb-4">
+                            <i class="bi bi-x-circle-fill me-2 fs-5"></i>
+                            <div>Datos incorrectos. Inténtalo de nuevo.</div>
+                        </div>
+                    {% endif %}
+
+                    <div class="form-floating mb-3">
+                        <input type="text" name="username" class="form-control" id="floatingUser" placeholder="Usuario" required>
+                        <label for="floatingUser" class="text-muted">Usuario o Cédula</label>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <input type="password" name="password" class="form-control" id="floatingPass" placeholder="Contraseña" required>
+                        <label for="floatingPass" class="text-muted">Contraseña</label>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="remember">
+                            <label class="form-check-label small text-muted" for="remember">Recordarme</label>
+                        </div>
+                        <a href="#" class="text-decoration-none small text-success fw-bold">¿Olvidaste clave?</a>
+                    </div>
+
+                    <button type="submit" class="btn-login-pro text-uppercase ls-1">
+                        Ingresar Ahora
+                    </button>
+
+                </form>
+
+                <div class="text-center mt-5">
+                    <p class="text-muted small mb-2">¿Eres Nuevo?</p>
+                    <a href="{% url 'registro_publico' %}" class="btn btn-outline-dark rounded-pill px-4 btn-sm fw-bold">
+                        Registrarse Gratis
+                    </a>
+                </div>
+
+                <div class="mt-4 text-center">
+                     <a href="{% url 'dashboard' %}" class="text-muted small text-decoration-none hover-green">
+                        <i class="bi bi-arrow-left"></i> Regresar al Inicio
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

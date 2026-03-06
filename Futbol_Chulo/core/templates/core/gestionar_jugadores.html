@@ -1,0 +1,205 @@
+{% extends 'core/base.html' %}
+
+{% block contenido %}
+<div class="row">
+    
+    <div class="col-12 mb-4">
+        <form method="get" class="d-flex gap-2 bg-dark p-3 rounded border border-secondary shadow-sm">
+            <select name="equipo" class="form-select bg-secondary text-white border-0">
+                <option value="">-- Ver todos los equipos --</option>
+                {% for e in equipos %}
+                    <option value="{{ e.id }}" {% if e.id|stringformat:"s" == request.GET.equipo %}selected{% endif %}>
+                        {{ e.nombre }} ({{ e.torneo.nombre }})
+                    </option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="btn btn-neon">FILTRAR <i class="bi bi-search"></i></button>
+            
+            {% if editando %}
+                <a href="{% url 'gestionar_jugadores' %}" class="btn btn-outline-light">Ver Todos</a>
+            {% endif %}
+        </form>
+    </div>
+
+    <div class="col-lg-8">
+        <h4 class="text-white mb-3"><i class="bi bi-people"></i> Nómina de Jugadores</h4>
+        
+        <div class="row g-3">
+            {% for jugador in jugadores %}
+            <div class="col-md-6 col-xl-4">
+                <div class="card h-100 border-0 shadow-sm text-center position-relative" style="background: #1e293b; overflow: hidden;">
+                    <div class="position-absolute top-0 w-100" style="height: 5px; background: var(--neon-blue);"></div>
+                    
+                    <div class="card-body p-3 d-flex flex-column justify-content-between">
+                        <div>
+                            <div class="mb-2 position-relative d-inline-block">
+                                {% if jugador.foto %}
+                                    <img src="{{ jugador.foto.url }}" class="rounded-circle border border-2 border-white" style="width: 80px; height: 80px; object-fit: cover;">
+                                {% else %}
+                                    <div class="rounded-circle bg-secondary mx-auto d-flex align-items-center justify-content-center text-white" style="width: 80px; height: 80px;">
+                                        <i class="bi bi-person-fill h1 mb-0"></i>
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <h6 class="text-white fw-bold mb-0 text-truncate" title="{{ jugador.nombres }}">{{ jugador.nombres }}</h6>
+                            <span class="badge bg-dark border border-secondary text-info my-1">#{{ jugador.dorsal }}</span>
+                            <p class="small text-muted mb-0 text-truncate">{{ jugador.equipo.nombre }}</p>
+                            <p class="small text-muted" style="font-size: 0.7rem;">CI: {{ jugador.cedula }}</p>
+                        </div>
+
+                        <div class="mt-3 pt-2 border-top border-secondary d-flex justify-content-center gap-2">
+                            <a href="{% url 'editar_jugador' jugador.id %}" class="btn btn-sm btn-outline-info" title="Editar">
+                                <i class="bi bi-pencil-square"></i>
+                            </a>
+                            <a href="{% url 'eliminar_jugador' jugador.id %}" class="btn btn-sm btn-outline-danger" title="Eliminar" onclick="return confirm('¿Estás seguro de eliminar a {{ jugador.nombres }}? Se borrarán sus goles y tarjetas.')">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12">
+                <div class="alert alert-dark text-center border-secondary py-5">
+                    <i class="bi bi-people display-4 text-secondary"></i>
+                    <p class="mt-3">No hay jugadores registrados con este criterio.</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card border-secondary sticky-top shadow-lg" style="background: #151e2d; top: 100px;">
+            <div class="card-header border-bottom border-secondary bg-transparent">
+                <h5 class="text-neon-green mb-0">
+                    {% if editando %}
+                        <i class="bi bi-pencil-square"></i> Editar Jugador
+                    {% else %}
+                        <i class="bi bi-person-plus"></i> Fichar Jugador
+                    {% endif %}
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label class="form-label text-light small fw-bold">Equipo</label>
+                        {{ form.equipo }}
+                        {% if form.equipo.errors %}<div class="text-danger small">{{ form.equipo.errors }}</div>{% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label text-light small fw-bold">Cédula de Identidad</label>
+                        {{ form.cedula }}
+                        {% if form.cedula.errors %}<div class="text-danger small">{{ form.cedula.errors }}</div>{% endif %}
+                        <div id="cedula-feedback" class="small mt-1"></div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label text-light small fw-bold">Nombres Completos</label>
+                        {{ form.nombres }}
+                        {% if form.nombres.errors %}<div class="text-danger small">{{ form.nombres.errors }}</div>{% endif %}
+                    </div>
+
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <label class="form-label text-light small fw-bold">Dorsal</label>
+                            {{ form.dorsal }}
+                        </div>
+                        <div class="col-6 mb-3">
+                            <label class="form-label text-light small fw-bold">Foto</label>
+                            {{ form.foto }}
+                        </div>
+                    </div>
+
+                    <div class="d-grid mt-4 gap-2">
+                        <button type="submit" class="btn btn-neon" id="btn-guardar">
+                            {% if editando %}ACTUALIZAR DATOS{% else %}HABILITAR JUGADOR{% endif %}
+                        </button>
+                        
+                        {% if editando %}
+                            <a href="{% url 'gestionar_jugadores' %}?equipo={{ form.instance.equipo.id }}" class="btn btn-outline-light">Cancelar Edición</a>
+                        {% endif %}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const inputCedula = document.getElementById('id_cedula');
+        const inputNombres = document.getElementById('id_nombres');
+        const feedback = document.getElementById('cedula-feedback');
+        
+        if(inputCedula) {
+            inputCedula.addEventListener('change', function() {
+                const cedula = this.value;
+                
+                // Limpiamos estados previos
+                inputCedula.classList.remove('is-valid', 'is-invalid');
+                inputNombres.classList.remove('is-valid');
+                feedback.innerHTML = "";
+                
+                if(cedula.length === 10) {
+                    // 1. Bloqueamos mientras busca
+                    inputNombres.value = "";
+                    inputNombres.placeholder = "Consultando Registro Civil / SRI...";
+                    inputNombres.disabled = true; 
+                    feedback.className = "text-info small";
+                    feedback.innerHTML = '<div class="spinner-border spinner-border-sm" role="status"></div> Buscando datos...';
+                    
+                    // 2. Llamada al Backend
+                    fetch(`/api/consultar-cedula/?cedula=${cedula}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        inputNombres.disabled = false; // Desbloqueamos siempre al terminar
+                        
+                        if(data.exito && data.nombre) {
+                            // CASO A: ¡ENCONTRADO!
+                            inputNombres.value = data.nombre;
+                            inputNombres.placeholder = "";
+                            
+                            // Feedback Visual Verde
+                            inputCedula.classList.add('is-valid');
+                            inputNombres.classList.add('is-valid'); 
+                            feedback.className = "text-success small";
+                            feedback.innerHTML = '<i class="bi bi-check-circle-fill"></i> Datos obtenidos del SRI';
+                            
+                        } else if (data.exito && !data.nombre) {
+                            // CASO B: CÉDULA VÁLIDA, PERO NO ESTÁ EN SRI
+                            inputNombres.value = "";
+                            inputNombres.placeholder = "Ingrese los nombres manualmente...";
+                            inputNombres.focus();
+                            
+                            inputCedula.classList.add('is-valid');
+                            feedback.className = "text-warning small";
+                            feedback.innerHTML = '<i class="bi bi-exclamation-circle"></i> Cédula válida, pero sin datos públicos. Llene el nombre manualmente.';
+                            
+                        } else {
+                            // CASO C: CÉDULA FALSA
+                            inputNombres.value = "";
+                            inputNombres.placeholder = "Corrija la cédula";
+                            
+                            inputCedula.classList.add('is-invalid');
+                            feedback.className = "text-danger small";
+                            feedback.innerHTML = '<i class="bi bi-x-circle"></i> ' + data.error;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        inputNombres.disabled = false;
+                        inputNombres.placeholder = "Error de conexión. Llene manual.";
+                        feedback.innerHTML = "";
+                    });
+                }
+            });
+        }
+    });
+</script>
+
+{% endblock %}

@@ -1,0 +1,201 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Equipos | Cancha El Chulo{% endblock %}
+
+{% block contenido %}
+<div class="row g-4">
+    
+    <div class="col-lg-8">
+        
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <div>
+                <h3 class="fw-bold text-dark mb-0" style="font-family: 'Montserrat', sans-serif;">
+                    <i class="bi bi-shield-shaded text-success me-2"></i>Equipos Inscritos
+                </h3>
+                <p class="text-muted small mb-0">Administra los clubes participantes</p>
+            </div>
+            
+            <div class="d-none d-md-block">
+                <span class="badge bg-white text-secondary border px-3 py-2 rounded-pill shadow-sm">
+                    Total: <strong class="text-dark">{{ equipos|length }}</strong>
+                </span>
+            </div>
+        </div>
+        
+        <div class="row g-3">
+            {% for equipo in equipos %}
+            <div class="col-md-12">
+                <div class="card card-pro border-0 shadow-sm animate__animated animate__fadeInUp">
+                    <div class="card-body p-3">
+                        <div class="row align-items-center">
+                            
+                            <div class="col-auto">
+                                <div class="position-relative">
+                                    {% if equipo.escudo %}
+                                        <img src="{{ equipo.escudo.url }}" alt="Escudo" class="rounded-circle shadow-sm border border-2 border-white" style="width: 70px; height: 70px; object-fit: cover;">
+                                    {% else %}
+                                        <div class="rounded-circle bg-light d-flex justify-content-center align-items-center text-muted border border-2 border-white shadow-sm" style="width: 70px; height: 70px;">
+                                            <i class="bi bi-shield-fill h3 mb-0 opacity-25"></i>
+                                        </div>
+                                    {% endif %}
+                                    
+                                    {% if equipo.pagado %}
+                                        <span class="position-absolute bottom-0 end-0 bg-success border border-white rounded-circle p-1" title="Inscripción Pagada"></span>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="col">
+                                <h5 class="fw-bold text-dark mb-1">{{ equipo.nombre }}</h5>
+                                
+                                <div class="d-flex flex-column flex-md-row gap-md-3 text-muted small">
+                                    <span class="mb-1 mb-md-0">
+                                        <i class="bi bi-person-badge me-1 text-primary"></i> 
+                                        DT: {{ equipo.dirigente.first_name }} {{ equipo.dirigente.last_name }}
+                                    </span>
+                                    <span class="badge bg-light text-dark border fw-normal align-self-start">
+                                        <i class="bi bi-trophy me-1 text-warning"></i> {{ equipo.torneo.nombre }}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="col-auto mt-3 mt-md-0">
+                                <div class="btn-group shadow-sm rounded-3" role="group">
+                                    <a href="{% url 'editar_equipo' equipo.id %}" class="btn btn-white border btn-sm text-secondary" title="Editar">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+                                    <a href="{% url 'eliminar_equipo' equipo.id %}" class="btn btn-white border btn-sm text-danger" title="Eliminar" onclick="return confirm('⚠️ ¿Eliminar a {{ equipo.nombre }}?\nEsta acción borrará todos sus jugadores y estadísticas.')">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12">
+                <div class="text-center py-5 rounded-4 border border-dashed bg-white bg-opacity-50">
+                    <div class="mb-3 text-muted opacity-25">
+                        <i class="bi bi-shield-slash" style="font-size: 3.5rem;"></i>
+                    </div>
+                    <h5 class="text-secondary fw-bold">Sin equipos registrados</h5>
+                    <p class="text-muted small">Utiliza el formulario para inscribir al primero.</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card card-pro border-0 shadow-lg sticky-top" style="top: 100px; z-index: 90;">
+            
+            <div class="card-header bg-white border-0 pt-4 pb-0 px-4">
+                <div class="d-flex align-items-center">
+                    <div class="bg-primary text-white rounded-3 p-2 me-3 shadow-sm">
+                        {% if editando %}
+                            <i class="bi bi-pencil-square fw-bold"></i>
+                        {% else %}
+                            <i class="bi bi-person-plus-fill fw-bold"></i>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <h6 class="fw-bold text-dark mb-0">
+                            {% if editando %}Editar Equipo{% else %}Inscribir Equipo{% endif %}
+                        </h6>
+                        <small class="text-muted">Datos del Club</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-body p-4">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    {% for field in form %}
+                    <div class="mb-3">
+                        <label class="form-label text-secondary small fw-bold text-uppercase ls-1">
+                            {{ field.label }}
+                        </label>
+                        
+                        <div class="input-group-pro">
+                            {{ field }}
+                        </div>
+
+                        {% if field.errors %}
+                            <div class="text-danger small mt-1 animate__animated animate__fadeIn">
+                                <i class="bi bi-exclamation-circle me-1"></i> {{ field.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                    
+                    {% if not editando %}
+                    <div class="alert alert-light border border-dashed d-flex align-items-start small text-muted p-2 rounded-3 mt-3">
+                        <i class="bi bi-info-circle-fill text-primary me-2 mt-1"></i>
+                        <div>Solo se muestran usuarios con rol <strong>"Dirigente"</strong>.</div>
+                    </div>
+                    {% endif %}
+
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="submit" class="btn btn-sport py-2 shadow-sm text-uppercase">
+                            {% if editando %}
+                                <i class="bi bi-save me-2"></i> Actualizar
+                            {% else %}
+                                <i class="bi bi-plus-lg me-2"></i> Guardar Equipo
+                            {% endif %}
+                        </button>
+                        
+                        {% if editando %}
+                            <a href="{% url 'gestionar_equipos' %}" class="btn btn-light text-muted border">
+                                Cancelar
+                            </a>
+                        {% endif %}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Estilos para inputs en esta vista específica */
+    .card-body input[type="text"],
+    .card-body select,
+    .card-body textarea,
+    .card-body input[type="file"] {
+        width: 100%;
+        padding: 0.6rem 1rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        background-color: #f8fafc;
+        color: #334155;
+        transition: all 0.2s;
+    }
+    
+    .card-body input:focus,
+    .card-body select:focus {
+        border-color: var(--primary-light); /* Azul pizarra */
+        background-color: #fff;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(30, 41, 59, 0.1);
+    }
+    
+    /* Input File más bonito */
+    .card-body input[type="file"] {
+        padding: 0.4rem;
+        background: white;
+    }
+    .card-body input[type="file"]::file-selector-button {
+        border: none;
+        background: #f1f5f9;
+        padding: 0.4rem 0.8rem;
+        border-radius: 6px;
+        margin-right: 10px;
+        color: #475569;
+        font-weight: 600;
+        cursor: pointer;
+    }
+</style>
+{% endblock %}

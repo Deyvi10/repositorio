@@ -1,0 +1,246 @@
+{% extends 'core/base.html' %}
+
+{% block contenido %}
+<div class="row">
+    
+    <div class="col-12 mb-3">
+        <div class="card bg-dark border-secondary text-center shadow">
+            <div class="card-body py-2">
+                <div class="d-flex justify-content-center align-items-center gap-5">
+                    
+                    <div class="text-center">
+                        <h4 class="text-white m-0 d-none d-md-block">{{ partido.equipo_local.nombre }}</h4>
+                        <small class="text-muted d-md-none">LOCAL</small>
+                    </div>
+
+                    <div class="display-4 fw-bold text-neon-green bg-black px-4 rounded border border-secondary shadow-lg">
+                        {{ partido.goles_local }} - {{ partido.goles_visita }}
+                    </div>
+
+                    <div class="text-center">
+                        <h4 class="text-white m-0 d-none d-md-block">{{ partido.equipo_visita.nombre }}</h4>
+                        <small class="text-muted d-md-none">VISITA</small>
+                    </div>
+                </div>
+                
+                <div class="mt-2">
+                    <span class="badge bg-danger animate__animated animate__pulse animate__infinite">EN VIVO</span>
+                    <small class="text-muted ms-2">{{ partido.cancha }}</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-5">
+        <div class="card border-0 mb-3" style="background: transparent;">
+            <div class="card-header bg-dark border-secondary text-center text-info fw-bold">
+                {{ partido.equipo_local.nombre }}
+            </div>
+            {% include 'core/item_jugador_vocalia_mejorado.html' with lista=jugadores_local %}
+        </div>
+    </div>
+    
+    <div class="col-md-2">
+        <h6 class="text-center text-muted small mt-2">HISTORIAL</h6>
+        <div class="d-flex flex-column gap-2 p-1 rounded bg-black border border-secondary" style="max-height: 600px; overflow-y: auto;">
+            {% for ev in eventos %}
+            <div class="card border-0 p-2 position-relative shadow-sm" style="background: #151e2d;">
+                
+                <a href="{% url 'eliminar_evento' ev.id %}" class="position-absolute top-0 end-0 text-secondary p-1" style="text-decoration: none;" onclick="return confirm('¿Borrar este evento? Se restará del marcador si es gol.')" title="Eliminar evento erróneo">
+                    <i class="bi bi-x-circle-fill text-danger"></i>
+                </a>
+                
+                <div class="text-center">
+                    {% if ev.tipo == 'GOL' %}
+                        <span class="text-success fw-bold fs-5">⚽ GOL</span>
+                    {% elif ev.tipo == 'TA' %}
+                        <span class="text-warning fw-bold fs-5">🟨 T.A.</span>
+                    {% elif ev.tipo == 'TR' %}
+                        <span class="text-danger fw-bold fs-5">🟥 T.R.</span>
+                    {% elif ev.tipo == 'ASIS' %}
+                        <span class="text-info fw-bold">✅ Asist.</span>
+                    {% else %}
+                        <span class="text-white small">{{ ev.get_tipo_display }}</span>
+                    {% endif %}
+                    
+                    <div class="text-white mt-1 fw-bold small">{{ ev.jugador.nombres }}</div>
+                    <div class="text-muted" style="font-size: 0.65rem;">{{ ev.jugador.equipo.nombre }}</div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="text-center text-muted small py-4">
+                Sin eventos aún.
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="col-md-5">
+        <div class="card border-0 mb-3" style="background: transparent;">
+            <div class="card-header bg-dark border-secondary text-center text-warning fw-bold">
+                {{ partido.equipo_visita.nombre }}
+            </div>
+            {% include 'core/item_jugador_vocalia_mejorado.html' with lista=jugadores_visita %}
+        </div>
+    </div>
+
+    <div class="col-12 mt-4">
+        <div class="card border-warning shadow-lg" style="background: #1e293b;">
+            <div class="card-header bg-warning border-warning text-dark d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 fw-bold"><i class="bi bi-cash-coin"></i> Sanciones Económicas y Multas</h5>
+                <span class="badge bg-dark text-warning">Finanzas</span>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    
+                    <div class="col-md-5 border-end border-secondary">
+                        <h6 class="text-white mb-3">Aplicar Nueva Multa</h6>
+                        <form method="post" id="formMulta">
+                            {% csrf_token %}
+                            <input type="hidden" name="nueva_multa" value="1">
+                            
+                            <div class="mb-3">
+                                <label class="text-muted small">Equipo a Sancionar:</label>
+                                <select name="equipo_multa" class="form-select bg-dark text-white border-secondary" required>
+                                    <option value="{{ partido.equipo_local.id }}">{{ partido.equipo_local.nombre }} (Local)</option>
+                                    <option value="{{ partido.equipo_visita.id }}">{{ partido.equipo_visita.nombre }} (Visita)</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3 d-flex gap-2">
+                                <button type="button" class="btn btn-sm btn-outline-info w-50" onclick="setMulta('Mal Comportamiento Barra', '5.00')">
+                                    🗣️ Barra ($5.00)
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-info w-50" onclick="setMulta('Cambio en Graderío', '2.50')">
+                                    👕 Graderío ($2.50)
+                                </button>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-8">
+                                    <label class="text-muted small">Motivo:</label>
+                                    <input type="text" name="motivo_multa" id="inputMotivo" class="form-control bg-dark text-white border-secondary" placeholder="Ej: Insultos al árbitro" required>
+                                </div>
+                                <div class="col-4">
+                                    <label class="text-muted small">Valor ($):</label>
+                                    <input type="number" step="0.01" name="monto_multa" id="inputMonto" class="form-control bg-dark text-white border-secondary" placeholder="0.00" required>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-warning w-100 mt-3 fw-bold">
+                                <i class="bi bi-gavel"></i> APLICAR MULTA
+                            </button>
+                        </form>
+                    </div>
+
+                    <div class="col-md-7 ps-md-4 mt-3 mt-md-0">
+                        <h6 class="text-white mb-3">Multas en este Partido</h6>
+                        {% if multas %}
+                            <div class="table-responsive">
+                                <table class="table table-dark table-sm table-hover border border-secondary">
+                                    <thead>
+                                        <tr class="text-secondary small">
+                                            <th>Equipo</th>
+                                            <th>Motivo</th>
+                                            <th class="text-end">Monto</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for m in multas %}
+                                        <tr>
+                                            <td class="fw-bold text-warning">{{ m.equipo.nombre }}</td>
+                                            <td>{{ m.motivo }}</td>
+                                            <td class="text-end text-success fw-bold">${{ m.monto }}</td>
+                                            <td class="text-end">
+                                                <a href="{% url 'eliminar_multa' m.id %}" class="text-danger" onclick="return confirm('¿Eliminar esta multa?')"><i class="bi bi-trash"></i></a>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <div class="alert alert-dark border-secondary text-center">
+                                <small class="text-muted">No hay sanciones económicas registradas.</small>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 mt-4 mb-5">
+        <div class="card border-secondary shadow-lg" style="background: #0f172a;">
+            <div class="card-header border-bottom border-secondary bg-dark">
+                <h5 class="text-neon-blue mb-0"><i class="bi bi-file-earmark-text"></i> Cierre del Partido e Informes</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="guardar_informe" value="1">
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-white fw-bold">Informe del Vocal de Mesa:</label>
+                            <textarea name="informe_vocal" class="form-control bg-dark text-white border-secondary" rows="4" placeholder="Novedades, hora de inicio, comportamiento de barras, balones...">{{ partido.informe_vocal|default:'' }}</textarea>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-white fw-bold">Informe Arbitral:</label>
+                            <textarea name="informe_arbitro" class="form-control bg-dark text-white border-secondary" rows="4" placeholder="Incidentes en cancha, agresiones, estado del campo, novedades arbitrales...">{{ partido.informe_arbitro|default:'' }}</textarea>
+                        </div>
+                    </div>
+
+                    <hr class="border-secondary my-4">
+
+                    <div class="row align-items-center">
+                        
+                        <div class="col-md-4 text-center mb-3 mb-md-0">
+                            <div class="form-check form-switch d-inline-block text-start p-3 rounded border border-secondary bg-dark w-100">
+                                <input class="form-check-input" type="checkbox" name="validado_local" id="checkLocal" {% if partido.validado_local %}checked{% endif %}>
+                                <label class="form-check-label text-white ms-2" for="checkLocal">
+                                    Conformidad Equipo Local<br>
+                                    <small class="text-info">{{ partido.equipo_local.nombre }}</small>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4 text-center">
+                            <button type="submit" class="btn btn-neon w-100 mb-2 py-2 fw-bold">
+                                <i class="bi bi-save"></i> GUARDAR / ACTUALIZAR
+                            </button>
+                            
+                            <a href="{% url 'generar_acta_pdf' partido.id %}" target="_blank" class="btn btn-outline-light w-100 py-2">
+                                <i class="bi bi-file-pdf-fill text-danger"></i> GENERAR ACTA PDF
+                            </a>
+                        </div>
+
+                        <div class="col-md-4 text-center mt-3 mt-md-0">
+                            <div class="form-check form-switch d-inline-block text-start p-3 rounded border border-secondary bg-dark w-100">
+                                <input class="form-check-input" type="checkbox" name="validado_visita" id="checkVisita" {% if partido.validado_visita %}checked{% endif %}>
+                                <label class="form-check-label text-white ms-2" for="checkVisita">
+                                    Conformidad Equipo Visita<br>
+                                    <small class="text-warning">{{ partido.equipo_visita.nombre }}</small>
+                                </label>
+                            </div>
+                        </div>
+
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    function setMulta(motivo, monto) {
+        document.getElementById('inputMotivo').value = motivo;
+        document.getElementById('inputMonto').value = monto;
+    }
+</script>
+
+{% endblock %}

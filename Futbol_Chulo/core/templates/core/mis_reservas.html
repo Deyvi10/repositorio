@@ -1,0 +1,77 @@
+{% extends 'core/base.html' %}
+
+{% block contenido %}
+<div class="container animate__animated animate__fadeIn">
+    
+    <div class="text-center mb-5 mt-4">
+        <h6 class="text-uppercase fw-bold ls-1 mb-2" style="color: var(--accent-green);">
+            <i class="bi bi-receipt me-1"></i> Historial de Alquileres
+        </h6>
+        <h2 class="display-5 fw-bold mb-3" style="color: var(--primary-dark);">Mis Reservas</h2>
+        <p class="text-muted fs-5">Gestiona tus turnos y confirma tus pagos pendientes.</p>
+    </div>
+
+    <div class="row g-4 mb-5">
+        {% for r in reservas %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card card-pro h-100 {% if r.estado == 'PENDIENTE' %}border-start border-warning border-4{% elif r.estado == 'ACTIVA' %}border-start border-success border-4{% else %}border-start border-danger border-4{% endif %}">
+                
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="badge bg-light text-dark border border-secondary-subtle shadow-sm px-3 py-2 rounded-pill">
+                            <i class="bi bi-calendar-event me-1 text-muted"></i> {{ r.fecha|date:"d M Y" }}
+                        </span>
+                        
+                        {% if r.estado == 'ACTIVA' %}
+                            <span class="badge bg-success bg-opacity-10 text-success border border-success px-3 py-2 rounded-pill">Confirmada</span>
+                        {% elif r.estado == 'PENDIENTE' %}
+                            <span class="badge bg-warning bg-opacity-10 text-warning border border-warning text-dark px-3 py-2 rounded-pill">Pendiente</span>
+                        {% else %}
+                            <span class="badge bg-danger bg-opacity-10 text-danger border border-danger px-3 py-2 rounded-pill">Cancelada</span>
+                        {% endif %}
+                    </div>
+
+                    <h4 class="fw-bold mb-1" style="color: var(--primary-dark);">{{ r.hora_inicio|time:"H:i" }} - {{ r.hora_fin|time:"H:i" }}</h4>
+                    <p class="text-muted small mb-0"><i class="bi bi-geo-alt-fill text-success me-1"></i> Cancha Principal El Chulo</p>
+
+                    <div class="mt-4 pt-3 border-top d-flex justify-content-between align-items-center">
+                        <div>
+                            <small class="text-muted d-block fw-bold" style="font-size: 0.7rem;">TOTAL</small>
+                            <span class="fw-bold fs-5 text-success">${{ r.precio_total }}</span>
+                        </div>
+                        
+                        <div class="text-end">
+                            {% if r.estado == 'PENDIENTE' %}
+                                <a href="https://wa.me/593964049283?text= Hola Cancha El Chulo, deseo notificar la reserva para proceder al pago correspondiente *{{ r.hora_inicio|time:'H:i' }}* del día *{{ r.fecha|date:'d/m/Y' }}*. Mi usuario es {{ user.username }}." 
+                                   target="_blank" 
+                                   class="btn btn-sm btn-sport rounded-pill px-3 shadow-sm d-inline-flex align-items-center">
+                                   <i class="bi bi-whatsapp me-2 fs-6"></i> Reportar Pago
+                                </a>
+                            {% elif r.estado == 'ACTIVA' %}
+                                <a href="{% url 'cancelar_reserva' r.id %}" class="btn btn-sm btn-outline-danger fw-bold rounded-pill px-3">
+                                   Cancelar Turno
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+        {% empty %}
+        
+        <div class="col-12 text-center py-5">
+            <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-4 shadow-sm" style="width: 100px; height: 100px; background-color: var(--bg-body); border: 1px solid rgba(0,0,0,0.05);">
+                <i class="bi bi-calendar-x text-muted" style="font-size: 3rem; opacity: 0.5;"></i>
+            </div>
+            <h4 class="fw-bold" style="color: var(--primary-dark);">No tienes reservas</h4>
+            <p class="text-muted mb-4 fs-5">Aún no has alquilado ninguna cancha con nosotros.</p>
+            <a href="{% url 'reservar_cancha' %}" class="btn btn-sport rounded-pill px-5 py-2 fw-bold shadow-sm">
+                Reservar Ahora <i class="bi bi-arrow-right-circle-fill ms-2"></i>
+            </a>
+        </div>
+        
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

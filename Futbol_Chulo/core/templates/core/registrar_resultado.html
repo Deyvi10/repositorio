@@ -1,0 +1,62 @@
+{% extends 'core/base.html' %}
+
+{% block contenido %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        
+        <div class="card border-0 shadow-lg" style="background: #1e293b;">
+            <div class="card-header bg-dark border-secondary text-center py-3">
+                <h5 class="text-neon-green mb-0">REGISTRAR MARCADOR</h5>
+                <small class="text-muted">{{ partido.torneo.nombre }} - {{ partido.get_etapa_display }}</small>
+            </div>
+            
+            <div class="card-body p-4">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="d-flex align-items-center justify-content-between mb-4">
+                        
+                        <div class="text-center w-50">
+                            {% if partido.equipo_local.escudo %}
+                                <img src="{{ partido.equipo_local.escudo.url }}" width="60" class="mb-2 rounded-circle">
+                            {% else %}
+                                <i class="bi bi-shield-fill display-4 text-secondary"></i>
+                            {% endif %}
+                            <h5 class="text-white fw-bold mt-2">{{ partido.equipo_local.nombre }}</h5>
+                            
+                            <input type="number" name="goles_local" class="form-control form-control-lg bg-dark text-white text-center border-secondary mx-auto fw-bold" style="width: 80px; font-size: 2rem;" value="0" min="0" required>
+                        </div>
+
+                        <div class="text-muted fw-bold h2">VS</div>
+
+                        <div class="text-center w-50">
+                            {% if partido.equipo_visita.escudo %}
+                                <img src="{{ partido.equipo_visita.escudo.url }}" width="60" class="mb-2 rounded-circle">
+                            {% else %}
+                                <i class="bi bi-shield-fill display-4 text-secondary"></i>
+                            {% endif %}
+                            <h5 class="text-white fw-bold mt-2">{{ partido.equipo_visita.nombre }}</h5>
+                            
+                            <input type="number" name="goles_visita" class="form-control form-control-lg bg-dark text-white text-center border-secondary mx-auto fw-bold" style="width: 80px; font-size: 2rem;" value="0" min="0" required>
+                        </div>
+                    </div>
+
+                    <div class="form-check form-switch mb-4 d-flex justify-content-center bg-dark p-2 rounded border border-secondary">
+                        <input class="form-check-input me-2" type="checkbox" name="wo" id="woCheck">
+                        <label class="form-check-label text-danger fw-bold" for="woCheck">Partido ganado por W.O. (No se presentó)</label>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-neon py-2">
+                            <i class="bi bi-check-circle"></i> GUARDAR RESULTADO FINAL
+                        </button>
+                        <a href="{% url 'programar_partidos' %}?torneo={{ partido.torneo.id }}" class="btn btn-outline-light">Cancelar</a>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

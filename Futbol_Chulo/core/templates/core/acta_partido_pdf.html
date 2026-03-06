@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        @page { size: A4; margin: 2cm; }
+        body { font-family: Helvetica, sans-serif; font-size: 10pt; color: #333; }
+        .header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 20px; }
+        .titulo { font-size: 16pt; font-weight: bold; text-transform: uppercase; }
+        .subtitulo { font-size: 12pt; color: #555; }
+        
+        .marcador-box { text-align: center; margin: 20px 0; padding: 10px; background-color: #eee; border: 1px solid #999; }
+        .goles { font-size: 24pt; font-weight: bold; }
+        .equipos { font-size: 14pt; font-weight: bold; }
+
+        table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
+        th, td { border: 1px solid #ccc; padding: 5px; text-align: left; font-size: 9pt; }
+        th { background-color: #f0f0f0; font-weight: bold; }
+        
+        .seccion { margin-top: 20px; margin-bottom: 10px; font-size: 11pt; font-weight: bold; border-bottom: 1px solid #ccc; }
+        
+        .informe-box { border: 1px solid #ccc; padding: 10px; min-height: 60px; font-style: italic; font-size: 9pt; margin-bottom: 10px; }
+        
+        .firmas { margin-top: 40px; width: 100%; text-align: center; }
+        .firma-linea { border-top: 1px solid #000; width: 80%; margin: 0 auto; padding-top: 5px; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="titulo">{{ partido.torneo.nombre }}</div>
+        <div class="subtitulo">ACTA OFICIAL DE JUEGO - JORNADA {{ partido.numero_fecha }}</div>
+        <div>{{ partido.fecha_hora|date:"l d F Y - H:i" }} | {{ partido.cancha }}</div>
+    </div>
+
+    <div class="marcador-box">
+        <div class="equipos">
+            {{ partido.equipo_local.nombre }} &nbsp;&nbsp; VS &nbsp;&nbsp; {{ partido.equipo_visita.nombre }}
+        </div>
+        <div class="goles">
+            {{ partido.goles_local }} &nbsp; - &nbsp; {{ partido.goles_visita }}
+        </div>
+        <div>
+            Ganador: 
+            {% if partido.goles_local > partido.goles_visita %}
+                {{ partido.equipo_local.nombre }}
+            {% elif partido.goles_visita > partido.goles_local %}
+                {{ partido.equipo_visita.nombre }}
+            {% else %}
+                EMPATE
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="seccion">DETALLE DE GOLES</div>
+    <table>
+        <thead>
+            <tr>
+                <th width="60%">Jugador</th>
+                <th width="40%">Equipo</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for g in goles %}
+            <tr>
+                <td>{{ g.jugador.nombres }} (#{{ g.jugador.dorsal }})</td>
+                <td>{{ g.jugador.equipo.nombre }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="2" style="text-align:center;">No hubo goles (0-0)</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="seccion">TARJETAS Y AMONESTACIONES</div>
+    <table>
+        <thead>
+            <tr>
+                <th>Jugador</th>
+                <th>Equipo</th>
+                <th>Sanción</th>
+                <th>Obs.</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for t in tarjetas %}
+            <tr>
+                <td>{{ t.jugador.nombres }}</td>
+                <td>{{ t.jugador.equipo.nombre }}</td>
+                <td style="color: {% if t.tipo == 'TA' %}orange{% else %}red{% endif %}; font-weight:bold;">
+                    {{ t.get_tipo_display }}
+                </td>
+                <td>{{ t.observacion|default:"-" }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4" style="text-align:center;">Juego Limpio (Sin tarjetas)</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    {% if partido.multas.all %}
+    <div class="seccion">SANCIONES ECONÓMICAS (MULTAS)</div>
+    <table>
+        <thead>
+            <tr>
+                <th>Equipo</th>
+                <th>Motivo</th>
+                <th>Monto ($)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for m in partido.multas.all %}
+            <tr>
+                <td>{{ m.equipo.nombre }}</td>
+                <td>{{ m.motivo }}</td>
+                <td>$ {{ m.monto }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
+    <div class="seccion">JUGADORES EN CANCHA (ASISTENCIA)</div>
+    <table style="border: none;">
+        <tr style="border: none;">
+            <td style="vertical-align: top; width: 50%; border: none;">
+                <strong>{{ partido.equipo_local.nombre }}</strong>
+                <ul>
+                    {% for a in asistencias_local %}
+                        <li>{{ a.jugador.nombres }} ({{ a.jugador.dorsal }})</li>
+                    {% endfor %}
+                </ul>
+            </td>
+            <td style="vertical-align: top; width: 50%; border: none;">
+                <strong>{{ partido.equipo_visita.nombre }}</strong>
+                <ul>
+                    {% for a in asistencias_visita %}
+                        <li>{{ a.jugador.nombres }} ({{ a.jugador.dorsal }})</li>
+                    {% endfor %}
+                </ul>
+            </td>
+        </tr>
+    </table>
+
+    <div class="seccion">INFORME DEL VOCAL</div>
+    <div class="informe-box">
+        {{ partido.informe_vocal|default:"Sin novedades reportadas."|linebreaksbr }}
+    </div>
+
+    <div class="seccion">INFORME ARBITRAL</div>
+    <div class="informe-box">
+        {{ partido.informe_arbitro|default:"Sin novedades reportadas."|linebreaksbr }}
+    </div>
+
+    <table class="firmas" style="margin-top: 50px; border: none;">
+        <tr style="border: none;">
+            <td style="border: none; text-align: center;">
+                <div class="firma-linea">
+                    Firma Capitán/DT Local<br>
+                    {% if partido.validado_local %}( VALIDADO DIGITALMENTE ){% endif %}
+                </div>
+            </td>
+            <td style="border: none; text-align: center;">
+                <div class="firma-linea">
+                    Firma Capitán/DT Visita<br>
+                    {% if partido.validado_visita %}( VALIDADO DIGITALMENTE ){% endif %}
+                </div>
+            </td>
+        </tr>
+        <tr style="border: none;">
+            <td colspan="2" style="border: none; text-align: center; padding-top: 40px;">
+                <div class="firma-linea" style="width: 40%;">
+                    Vocal de Mesa / Organización
+                </div>
+            </td>
+        </tr>
+    </table>
+
+</body>
+</html>
